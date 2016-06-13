@@ -13,72 +13,74 @@ class bmpImage:
 		
 	def load(self, fileName):
 	
-		print("Loading ", fileName + ".bmp")	
-	
-		fileObject = open(fileName + ".bmp", "rb") #get the width and height of bmp image
-
-		twoBytes = fileObject.read(2) #read first two bytes to check that this file is a bmp
-		
-		unpackedTwoBytes = struct.unpack('=H', twoBytes)[0] #interpret first two bytes as an unsigned short
-		#if unsigned short of multibyte 'BM' is stored as little endian, it will appear as 'MB'
-		#and the unsigned short will be 19778
-		
-		#if stored as big endian, it will appear as 'BM' which is a multibyte and is an unsigned short of 16973
-
-		#test whether or not the the file is described as a bmp file (first two characters should be 'BM')
-		if sys.byteorder ==  'little':
-			if unpackedTwoBytes != 19778:
-				print(fileName + ".bmp is either corrupt or not a .bmp image")
-				return -1
-		elif sys.byteorder == 'big':
-			if unpackedTwoBytes != 16973:
-				print(fileName + ".bmp is either corrupt or not a .bmp image")
-				return -1
-				
-		fileObject.read(16) #read 16 bytes until start of width and height bytes in the bmp header
-		width = fileObject.read(4) #store width and height in local variables
-		height = fileObject.read(4)
-		fileObject.close()
-		
-		self.width = struct.unpack('<i', width)[0]
-		self.height = struct.unpack('<i', height)[0]
-		
-		#create red, green, and blue character arrays to store pixel data
 		try:
-			self.red = [[0 for y in range(self.height)] for x in range(self.width)]
-			self.green = [[0 for y in range(self.height)] for x in range(self.width)]
-			self.blue = [[0 for y in range(self.height)] for x in range(self.width)]
-		except:
-			print("Could not initialize character arrays in class bmpImage")
-			return -1
-			
-		#find out how much padding goes on end of each row of data
-		pad = 4 - ((self.width * 3) % 4)
+			print("Loading ", fileName + ".bmp")	
+		
+			fileObject = open(fileName + ".bmp", "rb") #get the width and height of bmp image
 
-		if (pad == 4): #if our image is byte aligned to multiple of 4, then no need to add padding
-			pad = 0
-				
-		fileObject = open(fileName + ".bmp", "rb") #open bmp file to read pixel data into buffers
-		fileObject.read(54) #jump past all the header to where the pixel data starts
-		
-		countPadding = 0 #used to count how many bytes are read in until we hit the padding at the end of the row
-				
-		#load data from bmp into rgb buffers
-		h = self.height - 1 #use h to keep track of when to place padding
-		while h >= 0:
-			for w in range(self.width):							
-				char = fileObject.read(1)
-				self.blue[w][h] = struct.unpack('=B', char)[0]
-				char = fileObject.read(1)
-				self.green[w][h] = struct.unpack('=B', char)[0]
-				char = fileObject.read(1)
-				self.red[w][h] = struct.unpack('=B', char)[0]
-		
-				if w == self.width - 1:
-					fileObject.read(pad)
-			h = h - 1
-		fileObject.close()
-		
+			twoBytes = fileObject.read(2) #read first two bytes to check that this file is a bmp
+			
+			unpackedTwoBytes = struct.unpack('=H', twoBytes)[0] #interpret first two bytes as an unsigned short
+			#if unsigned short of multibyte 'BM' is stored as little endian, it will appear as 'MB'
+			#and the unsigned short will be 19778
+			
+			#if stored as big endian, it will appear as 'BM' which is a multibyte and is an unsigned short of 16973
+
+			#test whether or not the the file is described as a bmp file (first two characters should be 'BM')
+			if sys.byteorder ==  'little':
+				if unpackedTwoBytes != 19778:
+					print(fileName + ".bmp is either corrupt or not a .bmp image")
+					return -1
+			elif sys.byteorder == 'big':
+				if unpackedTwoBytes != 16973:
+					print(fileName + ".bmp is either corrupt or not a .bmp image")
+					return -1
+					
+			fileObject.read(16) #read 16 bytes until start of width and height bytes in the bmp header
+			width = fileObject.read(4) #store width and height in local variables
+			height = fileObject.read(4)
+			fileObject.close()
+			
+			self.width = struct.unpack('<i', width)[0]
+			self.height = struct.unpack('<i', height)[0]
+			
+			#create red, green, and blue character arrays to store pixel data
+			try:
+				self.red = [[0 for y in range(self.height)] for x in range(self.width)]
+				self.green = [[0 for y in range(self.height)] for x in range(self.width)]
+				self.blue = [[0 for y in range(self.height)] for x in range(self.width)]
+			except:
+				print("Could not initialize character arrays in class bmpImage")
+				return -1
+
+			#find out how much padding goes on end of each row of data
+			pad = 4 - ((self.width * 3) % 4)
+
+			if (pad == 4): #if our image is byte aligned to multiple of 4, then no need to add padding
+				pad = 0
+					
+			fileObject = open(fileName + ".bmp", "rb") #open bmp file to read pixel data into buffers
+			fileObject.read(54) #jump past all the header to where the pixel data starts
+			
+			countPadding = 0 #used to count how many bytes are read in until we hit the padding at the end of the row
+					
+			#load data from bmp into rgb buffers
+			h = self.height - 1 #use h to keep track of when to place padding
+			while h >= 0:
+				for w in range(self.width):							
+					char = fileObject.read(1)
+					self.blue[w][h] = struct.unpack('=B', char)[0]
+					char = fileObject.read(1)
+					self.green[w][h] = struct.unpack('=B', char)[0]
+					char = fileObject.read(1)
+					self.red[w][h] = struct.unpack('=B', char)[0]
+			
+					if w == self.width - 1:
+						fileObject.read(pad)
+				h = h - 1
+			fileObject.close()
+		except:
+			return -1
 		return 0
 		
 	def save(self, fileName):
@@ -136,3 +138,28 @@ class bmpImage:
 			return -1
 			
 		return 0
+		
+	def grayscale(self, option):
+
+		print("Applying algorithm...")
+	
+		if (option == 1):
+			#apply quick and dirty grayscale algorithm
+			#r = g = b = (r + g + b) / 3
+			for x in range(self.width):
+				for y in range(self.height):
+					avg = int((self.red[x][y] + self.green[x][y] + self.blue[x][y]) / 3.0)
+					self.red[x][y] = avg
+					self.green[x][y] = avg
+					self.blue[x][y] = avg
+		elif (option == 2):
+			#apply 'fixed' grayscale by weighing each color.
+			#the way humans perceive luminosity or brightness is wrong for the averaging algorithm
+			#weigh each color according to GIMP or Photoshop standard
+			#r = g = b = (r*0.3 + g*0.59 + b*0.11) / 3
+			for x in range(self.width):
+				for y in range(self.height):
+					avg = int(((self.red[x][y]*0.3) + (self.green[x][y]*0.59) + (self.blue[x][y]*0.11)) / 3.0)
+					self.red[x][y] = avg
+					self.green[x][y] = avg
+					self.blue[x][y] = avg
