@@ -163,3 +163,34 @@ class bmpImage:
 					self.red[x][y] = avg
 					self.green[x][y] = avg
 					self.blue[x][y] = avg
+	
+	def blurring(self, option):
+		print("Applying blurring algorithm...")
+		
+		if (option == 1):
+		
+			red = [[0 for y in range(self.height)] for x in range(self.width)]
+			green = [[0 for y in range(self.height)] for x in range(self.width)]
+			blue = [[0 for y in range(self.height)] for x in range(self.width)]
+			
+			#copy pixel data into seperate buffer so as not to re-use manipulated pixels
+			for x in range(self.width):
+				for y in range(self.height):
+					red[x][y] = self.red[x][y]
+					green[x][y] = self.green[x][y]
+					blue[x][y] = self.blue[x][y]
+					
+			#blur pixel with neighboring pixels
+			x = 1
+			y = 1 
+			for x in range(self.width - 1):
+				for y in range(self.height - 1):
+					self.red[x][y] = int((red[x][y - 1] + red[x - 1][y - 1] + red[x + 1][y - 1] + red[x][y - 1]
+						+ red[x][y] + red[x - 1][y] + red[x + 1][y]
+						+ red[x][y + 1] + red[x - 1][y + 1] + red[x + 1][y + 1]) / 9)
+					self.green[x][y] = int((green[x][y - 1] + green[x - 1][y - 1] + green[x + 1][y - 1] + green[x][y - 1]
+						+ green[x][y] + green[x - 1][y] + green[x + 1][y]
+						+ green[x][y + 1] + green[x - 1][y + 1] + green[x + 1][y + 1]) / 9)
+					self.blue[x][y] = int((blue[x][y - 1] + blue[x - 1][y - 1] + blue[x + 1][y - 1] + blue[x][y - 1]
+						+ blue[x][y] + blue[x - 1][y] + blue[x + 1][y]
+						+ blue[x][y + 1] + blue[x - 1][y + 1] + blue[x + 1][y + 1]) / 9)

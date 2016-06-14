@@ -63,13 +63,37 @@ def grayscale():
 		else:
 			print("Type in a number from the list of options.")
 	
+def blurring():
+	userChoice = 0
+	while (userChoice != 2):
+		
+		print("\nType the name of the blurring algorithm to perform on the image...\n")
+		
+		print("1 Simple Blurring Algorithm")
+		print("2 Return to main menu\n")
+		
+		try:
+			userChoice = int(input())
+		except:
+			print("Please type in an integer and press enter.")
+			continue
+		
+		if (userChoice == 1):
+			#bmp.blurring(1)
+			return
+		elif (userChoice == 2):
+			return
+		else:
+			print("Type in a number from the list of options.")
+			
 #main menu
 userChoice = 0
 while (userChoice != 2):
 	print("\nType the number of the image processing algorithm to apply to the image...\n")
 	
 	print("1 Grayscale")
-	print("2 Exit\n")
+	print("2 Blurring")
+	print("3 Exit\n")
 	
 	try:
 		userChoice = int(input())
@@ -80,7 +104,11 @@ while (userChoice != 2):
 	if (userChoice == 1):
 		grayscale()
 	elif (userChoice == 2):
+		blurring()
+	elif (userChoice == 3):
 		print("Saving image...")
+		bmp.save(pickImage)
+		sys.exit(0)
 	else:
 		print("Type in a number from the list of options.")
 	
