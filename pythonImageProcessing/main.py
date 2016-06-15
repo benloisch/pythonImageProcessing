@@ -79,7 +79,16 @@ def blurring():
 			continue
 		
 		if (userChoice == 1):
-			#bmp.blurring(1)
+			blurAmnt = 0
+			while (True):
+				print("\nPlease enter the pixel blur radius for a pixel...\n")
+				try:
+					blurAmnt = int(input())
+					break
+				except:
+					print("Please type in an integer and press enter.")
+					continue
+			bmp.blurring(1, blurAmnt)
 			return
 		elif (userChoice == 2):
 			return
@@ -88,7 +97,7 @@ def blurring():
 			
 #main menu
 userChoice = 0
-while (userChoice != 2):
+while (userChoice != 3):
 	print("\nType the number of the image processing algorithm to apply to the image...\n")
 	
 	print("1 Grayscale")
@@ -107,11 +116,9 @@ while (userChoice != 2):
 		blurring()
 	elif (userChoice == 3):
 		print("Saving image...")
-		bmp.save(pickImage)
-		sys.exit(0)
 	else:
 		print("Type in a number from the list of options.")
-	
+
 #save image to computer
 if (bmp.save("output") == -1):
 	print("Error saving bmp")

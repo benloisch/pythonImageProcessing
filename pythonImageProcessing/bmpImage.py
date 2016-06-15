@@ -89,10 +89,10 @@ class bmpImage:
 			fileObject = open(fileName + ".bmp", "wb") #get the width and height of bmp image
 
 			pad = 4 - ((self.width * 3) % 4) #padding of bytes at end of each row of pixel data
-			
+
 			if (pad == 4): #if our image is byte aligned to multiple of 4, then no need to add padding
 				pad = 0
-			
+
 			#fill out bitmap file header
 			fileObject.write(struct.pack('=B', 66)) #write 'BM' as first to bytes to show it is a bitmap for windows
 			fileObject.write(struct.pack('=B', 77))
@@ -108,12 +108,12 @@ class bmpImage:
 			fileObject.write(struct.pack('=H', 1)) #number of color planes
 			fileObject.write(struct.pack('=H', 24)) #number of bits per pixel
 			fileObject.write(struct.pack('=i', 0)) #compression method
-			fileObject.write(struct.pack('=i', (((self.width * 3) + pad) * self.height))) #image size in bytes	
+			fileObject.write(struct.pack('=i', (((self.width * 3) + pad) * self.height))) #image size in bytes
 			fileObject.write(struct.pack('=i', 0)) #horizontal resolution of image
 			fileObject.write(struct.pack('=i', 0)) #horizontal resolution of image
-			fileObject.write(struct.pack('=i', 0)) #number of colors in color palette 
+			fileObject.write(struct.pack('=i', 0)) #number of colors in color palette
 			fileObject.write(struct.pack('=i', 0)) #number of important colors used
-			
+
 			#write pixel data
 			h = self.height - 1 #height variable
 			while h >= 0:
@@ -124,19 +124,19 @@ class bmpImage:
 					fileObject.write(struct.pack('=B', green))
 					red = self.red[w][h]
 					fileObject.write(struct.pack('=B', red))
-			
+
 					if w == self.width - 1:
 						for p in range(pad):
 							fileObject.write(struct.pack('=B', 0))
-				
+
 				h = h - 1
-			
+
 			fileObject.close()
 		except:
 			fileObject.close()
 			print("Could not save bmp image")
 			return -1
-			
+
 		return 0
 		
 	def grayscale(self, option):
@@ -164,8 +164,11 @@ class bmpImage:
 					self.green[x][y] = avg
 					self.blue[x][y] = avg
 	
-	def blurring(self, option):
+	def blurring(self, option, blurRadius):
 		print("Applying blurring algorithm...")
+		
+		if (blurRadius <= 0):
+			blurRadius = 1
 		
 		if (option == 1):
 		
@@ -181,16 +184,36 @@ class bmpImage:
 					blue[x][y] = self.blue[x][y]
 					
 			#blur pixel with neighboring pixels
-			x = 1
-			y = 1 
-			for x in range(self.width - 1):
-				for y in range(self.height - 1):
-					self.red[x][y] = int((red[x][y - 1] + red[x - 1][y - 1] + red[x + 1][y - 1] + red[x][y - 1]
-						+ red[x][y] + red[x - 1][y] + red[x + 1][y]
-						+ red[x][y + 1] + red[x - 1][y + 1] + red[x + 1][y + 1]) / 9)
-					self.green[x][y] = int((green[x][y - 1] + green[x - 1][y - 1] + green[x + 1][y - 1] + green[x][y - 1]
-						+ green[x][y] + green[x - 1][y] + green[x + 1][y]
-						+ green[x][y + 1] + green[x - 1][y + 1] + green[x + 1][y + 1]) / 9)
-					self.blue[x][y] = int((blue[x][y - 1] + blue[x - 1][y - 1] + blue[x + 1][y - 1] + blue[x][y - 1]
-						+ blue[x][y] + blue[x - 1][y] + blue[x + 1][y]
-						+ blue[x][y + 1] + blue[x - 1][y + 1] + blue[x + 1][y + 1]) / 9)
+
+			for y in range(self.height):
+				for x in range(self.width):
+					#calculate top left and bottom right of matrix of square area to blur
+					topLeftX = x - blurRadius
+					topLeftY = y - blurRadius
+					bottomRightX = x + blurRadius
+					bottomRightY = y + blurRadius
+					
+					if topLeftX < 0: topLeftX = 0
+					if topLeftY < 0: topLeftY = 0
+					if bottomRightX >= self.width: bottomRightX = self.width - 1
+					if bottomRightY >= self.height: bottomRightY = self.height - 1
+					
+					amountOfPixels = ((bottomRightY+1) - topLeftY) * ((bottomRightX+1) - topLeftX)
+
+					if (amountOfPixels <= 0):
+						amountOfPixels = 1
+				
+					redTotal = 0
+					greenTotal = 0
+					blueTotal = 0
+					
+					#add up all the red, green, and blue values and divide by length of matrix (average them)
+					for yblur in range(topLeftY, bottomRightY + 1):
+						for xblur in range(topLeftX, bottomRightX + 1):
+							redTotal += self.red[xblur][yblur]
+							greenTotal += self.green[xblur][yblur]
+							blueTotal += self.blue[xblur][yblur]
+
+					self.red[x][y] = int(redTotal / amountOfPixels)
+					self.green[x][y] = int(greenTotal / amountOfPixels)
+					self.blue[x][y] = int(blueTotal / amountOfPixels)
