@@ -1,4 +1,0 @@
-gaussian blur
-convert to sRGB space
-more grayscale conversions http://www.tannerhelland.com/3643/grayscale-image-algorithm-vb6/
-and more examples of image manipulation http://scikit-image.org/docs/dev/auto_examples/
